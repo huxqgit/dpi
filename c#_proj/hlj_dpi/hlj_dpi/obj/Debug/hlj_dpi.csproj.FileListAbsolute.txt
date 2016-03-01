@@ -1,0 +1,5 @@
+G:\!!Work_Git\myself\Proj\dpi\c#_proj\hlj_dpi\hlj_dpi\bin\Debug\hlj_dpi.exe.config
+G:\!!Work_Git\myself\Proj\dpi\c#_proj\hlj_dpi\hlj_dpi\bin\Debug\hlj_dpi.exe
+G:\!!Work_Git\myself\Proj\dpi\c#_proj\hlj_dpi\hlj_dpi\bin\Debug\hlj_dpi.pdb
+G:\!!Work_Git\myself\Proj\dpi\c#_proj\hlj_dpi\hlj_dpi\obj\Debug\hlj_dpi.exe
+G:\!!Work_Git\myself\Proj\dpi\c#_proj\hlj_dpi\hlj_dpi\obj\Debug\hlj_dpi.pdb
