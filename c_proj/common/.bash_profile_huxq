@@ -1,0 +1,15 @@
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+
+# User specific environment and startup programs
+
+alias l='ls -lFtrah'
+
+PATH=$PATH:$HOME/bin
+PERL5LIB=/home/nscs/perl_modules/modules
+
+export PATH PERL5LIB

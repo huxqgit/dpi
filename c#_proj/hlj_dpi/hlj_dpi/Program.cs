@@ -11,8 +11,8 @@ namespace TextDataCreate
     {
         static void Main(string[] args)
         {
-            //Parse();
-            CreateData();
+            Parse();
+            //CreateData();
         }
 
         static void CreateData()
@@ -42,7 +42,7 @@ namespace TextDataCreate
 
             long count = 10000002;
 
-            string path = @"G:\!!Work_Git\myself\Proj\dpi\TextData\";
+            string path = System.Configuration.ConfigurationManager.AppSettings["path"];
             long temp = long.Parse(DateTime.Now.ToString("yyyyMMddHHmmss"));
             string dataFile = string.Format(@"{0}{1}.txt", path, temp);
             for (long i = 2; i < count; i++)
@@ -62,7 +62,7 @@ namespace TextDataCreate
         static void Parse()
         {
             string log = string.Format(@"{0}\test.log", AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\'));
-            string path = @"G:\!!Work_Git\myself\Proj\dpi\TextData\";
+            string path = System.Configuration.ConfigurationManager.AppSettings["path"];
             List<string> files = new List<string>(Directory.GetFiles(path));
             foreach (string file in files)
             {
@@ -79,7 +79,7 @@ namespace TextDataCreate
 
                 watch.Stop();
                 string theSecond = watch.Elapsed.TotalSeconds.ToString();
-                string lg = string.Format(@"{0} : {1}秒{2}", file, theSecond, System.Environment.NewLine);
+                string lg = string.Format(@"{0} : {1}s{2}", file, theSecond, System.Environment.NewLine);
                 File.AppendAllText(log, lg, Encoding.Default);
             }
         }

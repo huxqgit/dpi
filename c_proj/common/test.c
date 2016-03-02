@@ -1,79 +1,17 @@
 #include<stdio.h>
 #include<dirent.h>
 #include<time.h>
+#include<sys/stat.h>
 
-void main(int argc, char *argv[])
-{
-	const int BUF_SIZE = 1024 ;
-	char buf[BUF_SIZE];
 
-	char ch, infile[50], outfile[50];
-	struct dirent *ptr = NULL;
-	DIR *dir = NULL;
-	dir = opendir("./Data");
-	while((ptr = readdir(dir)) != NULL)
-	{
-		//跳过 . ..
-		if(ptr->d_name[0] == '.')
-		{
-			continue;
-		}
-
-		time_t start, end;
-		start =  clock();
-		//printf("%s is ready...\n", ptr->d_name);
-		//sprintf(infile, "./Data/%s\n", ptr->d_name);
-		int len = 0;
-		char *fileName = malloc(strlen("./Data/")+strlen(ptr->d_name)+1);
-		strcpy(fileName, "./Data/");
-    	strcat(fileName, ptr->d_name);
-		FILE *fp = fopen(fileName, "rb");
-		do
-		{
-			len = fread(buf,1,BUF_SIZE,fp);
-		}while(len != 0);
-    	end = clock();
-    	fclose(fp);
-    	printf("%s is ready: %d ms\n", ptr->d_name, end - start);
-	}
-}
-
-/*
-int GetFileList(char *path)
-{
-	DIR *dir = NULL;
-	struct dirent *ptr = NULL;
-
-	if ((dir = opendir(path)) == NULL)
-	{
-		perror("Open dir error...");
-	    exit(1);
-	}
-	//其中d_type表明该文件的类型：文件(8)、目录(4)、链接文件(10)等。
-	while((ptr = readdir(dir)) != NULL)
-	{
-		if(strcmp(ptr->d_name,".") == 0 || strcmp(ptr->d_name,"..") ==0 )
-		{
-			continue;
-		}
-		else if (ptr->d_type == 8)
-		{
-
-		}
-
-		printf("ready file:%s/%s\n", path, ptr->d_name);
-	}
-}
-*/
-
-char **getFileList(const char *path, int* fileCount)
+char** getFileList(const char *path, int* fileCount)
 {
     int count = 0;
     DIR *dir = NULL;
 	struct dirent *ptr = NULL;
     char **fileList = NULL;
     char file[512];
-    struct stat statbuf;
+    struct stat fileStat;
 
     //打开目录
     if ((dir = opendir(path)) == NULL)
@@ -82,20 +20,109 @@ char **getFileList(const char *path, int* fileCount)
 	    return NULL;
 	}
 
+    //读取目录，统计目录下的文件个数
     while((ptr = readdir(dir)) != NULL)
     {
-        //其中d_type表明该文件的类型：文件(8)、目录(4)、链接文件(10)等。
-        if (ptr->d_type == 8)
+        //文件绝对路径
+        snprintf(file, 512, "%s/%s", path, ptr->d_name); 
+
+        //得到文件信息 
+        lstat(file, &fileStat);
+
+        //判断是目录还是文件
+        if (!S_ISDIR(fileStat.st_mode))  
         {
             count++;
-        }
+        }        
     }    
 
     //关闭目录
     closedir(dir);
 
     //开辟字符指针数组，用于下一步的开辟容纳文件名字符串的空间
-    if(fileList == (char**))
+    if( (fileList = (char**)malloc(sizeof(char*) * count)) == NULL)
+    {
+        perror("first Malloc heap failed!..."); //记录日志
+        return NULL;
+    }
+
+    //打开目录
+    if ((dir = opendir(path)) == NULL)
+	{
+		perror("Open dir error..."); //记录日志
+	    return NULL;
+	}
+
+    int i;
+    for(i = 0; (ptr = readdir(dir)) != NULL && i < count;)
+    {
+        if(strlen(ptr->d_name) < 0)
+        {
+            continue;
+        }
+        
+        //文件绝对路径
+        snprintf(file, 512, "%s/%s", path, ptr->d_name); 
+
+        //得到文件信息 
+        lstat(file, &fileStat);
+
+        //判断是目录还是文件
+        if (!S_ISDIR(fileStat.st_mode))  
+        {
+            if( (fileList[i] = (char*)malloc(strlen(file) + 1)) == NULL)
+            {
+                perror("Second Malloc heap failed!..."); //记录日志
+                return NULL;
+            }
+
+            memset(fileList[i], 0, strlen(file) + 1);
+            strcpy(fileList[i], file);
+            i++;
+        }   
+    }
+
+    closedir(dir);
+
+    *fileCount = count;
+    return fileList;
         
 }
+
+
+void main(int argc, char *argv[])
+{
+    const int BUF_SIZE = 1024 ;
+    char readBuf[BUF_SIZE];
+    
+    const char *path = "./Data";
+    int fileCount = 0;
+    char** fileList = getFileList(path, &fileCount);
+
+    int i = 0;
+    for(i = 0; i < fileCount; i++)
+    {
+        char *file = fileList[i];
+        //printf("%s\n", file);
+
+        clock_t start, end;
+        start =  clock();
+
+        FILE *fp = fopen(file, "rb");
+        int len = 0;
+        do
+        {
+            len = fread(readBuf, 1, BUF_SIZE, fp);
+        }while(len != 0);
+
+        fclose(fp);
+
+        end = clock();
+
+        double theTimes = (double)(end - start)/CLOCKS_PER_SEC;
+        printf("%s is ready: %f s\n", file, theTimes);
+    }
+}
+
+
 
