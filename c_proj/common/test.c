@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<string.h>
 #include<dirent.h>
 #include<time.h>
 #include<sys/stat.h>
@@ -13,43 +14,43 @@ char** getFileList(const char *path, int* fileCount)
     char file[512];
     struct stat fileStat;
 
-    //´ò¿ªÄ¿Â¼
+    //æ‰“å¼€ç›®å½•
     if ((dir = opendir(path)) == NULL)
 	{
-		perror("Open dir error..."); //¼ÇÂ¼ÈÕÖ¾
+		perror("Open dir error..."); //è®°å½•æ—¥å¿—
 	    return NULL;
 	}
 
-    //¶ÁÈ¡Ä¿Â¼£¬Í³¼ÆÄ¿Â¼ÏÂµÄÎÄ¼ş¸öÊı
+    //è¯»å–ç›®å½•ï¼Œç»Ÿè®¡ç›®å½•ä¸‹çš„æ–‡ä»¶ä¸ªæ•°
     while((ptr = readdir(dir)) != NULL)
     {
-        //ÎÄ¼ş¾ø¶ÔÂ·¾¶
+        //æ–‡ä»¶ç»å¯¹è·¯å¾„
         snprintf(file, 512, "%s/%s", path, ptr->d_name); 
 
-        //µÃµ½ÎÄ¼şĞÅÏ¢ 
+        //å¾—åˆ°æ–‡ä»¶ä¿¡æ¯ 
         lstat(file, &fileStat);
 
-        //ÅĞ¶ÏÊÇÄ¿Â¼»¹ÊÇÎÄ¼ş
+        //åˆ¤æ–­æ˜¯ç›®å½•è¿˜æ˜¯æ–‡ä»¶
         if (!S_ISDIR(fileStat.st_mode))  
         {
             count++;
         }        
     }    
 
-    //¹Ø±ÕÄ¿Â¼
+    //å…³é—­ç›®å½•
     closedir(dir);
 
-    //¿ª±Ù×Ö·ûÖ¸ÕëÊı×é£¬ÓÃÓÚÏÂÒ»²½µÄ¿ª±ÙÈİÄÉÎÄ¼şÃû×Ö·û´®µÄ¿Õ¼ä
+    //å¼€è¾Ÿå­—ç¬¦æŒ‡é’ˆæ•°ç»„ï¼Œç”¨äºä¸‹ä¸€æ­¥çš„å¼€è¾Ÿå®¹çº³æ–‡ä»¶åå­—ç¬¦ä¸²çš„ç©ºé—´
     if( (fileList = (char**)malloc(sizeof(char*) * count)) == NULL)
     {
-        perror("first Malloc heap failed!..."); //¼ÇÂ¼ÈÕÖ¾
+        perror("first Malloc heap failed!..."); //è®°å½•æ—¥å¿—
         return NULL;
     }
 
-    //´ò¿ªÄ¿Â¼
+    //æ‰“å¼€ç›®å½•
     if ((dir = opendir(path)) == NULL)
 	{
-		perror("Open dir error..."); //¼ÇÂ¼ÈÕÖ¾
+		perror("Open dir error..."); //è®°å½•æ—¥å¿—
 	    return NULL;
 	}
 
@@ -61,18 +62,18 @@ char** getFileList(const char *path, int* fileCount)
             continue;
         }
         
-        //ÎÄ¼ş¾ø¶ÔÂ·¾¶
+        //æ–‡ä»¶ç»å¯¹è·¯å¾„
         snprintf(file, 512, "%s/%s", path, ptr->d_name); 
 
-        //µÃµ½ÎÄ¼şĞÅÏ¢ 
+        //å¾—åˆ°æ–‡ä»¶ä¿¡æ¯ 
         lstat(file, &fileStat);
 
-        //ÅĞ¶ÏÊÇÄ¿Â¼»¹ÊÇÎÄ¼ş
+        //åˆ¤æ–­æ˜¯ç›®å½•è¿˜æ˜¯æ–‡ä»¶
         if (!S_ISDIR(fileStat.st_mode))  
         {
             if( (fileList[i] = (char*)malloc(strlen(file) + 1)) == NULL)
             {
-                perror("Second Malloc heap failed!..."); //¼ÇÂ¼ÈÕÖ¾
+                perror("Second Malloc heap failed!..."); //è®°å½•æ—¥å¿—
                 return NULL;
             }
 
@@ -92,8 +93,10 @@ char** getFileList(const char *path, int* fileCount)
 
 void main(int argc, char *argv[])
 {
-    const int BUF_SIZE = 1024 ;
+    const char *split = "\r\n";
+    const int BUF_SIZE = 10240 ;
     char readBuf[BUF_SIZE];
+    char *linuBuf = NULL;
     
     const char *path = "./Data";
     int fileCount = 0;
@@ -109,10 +112,17 @@ void main(int argc, char *argv[])
         start =  clock();
 
         FILE *fp = fopen(file, "rb");
+        
         int len = 0;
         do
         {
             len = fread(readBuf, 1, BUF_SIZE, fp);
+            linuBuf = strtok(readBuf, split);
+            printf("%s\n", linuBuf);
+            while(linuBuf = strtok(NULL, split))
+            {
+                printf("%s\n", linuBuf);
+            }
         }while(len != 0);
 
         fclose(fp);
@@ -123,6 +133,9 @@ void main(int argc, char *argv[])
         printf("%s is ready: %f s\n", file, theTimes);
     }
 }
+
+
+
 
 
 
